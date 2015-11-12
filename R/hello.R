@@ -27,27 +27,15 @@ AWS_ACCESS_KEY_ID = 'AKIAJUWJX4N4SC6A3V6Q'
 AWS_SECRET_ACCESS_KEY = '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'
 BUCKET_NAME = 'anomaly.com.au'
 PREFIX = 'spinworker_attribution'
+PATTERN = 'log'
+FILE_PATH = 'C:\\workspace\\rs3helper'
+FILE_NAME = 'test.md'
 
-get_all_bucket_names <- function(access_key_id, secret_access_key) {
-  path <- system.file('python', 'get_all_bucket_names.py', package = 'rs3helper')
-  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key)
-  response <- system(command, intern = TRUE)
-  fromJSON(response)
-}
+#get_buckets(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 
-#get_all_bucket_names(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+#get_keys(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, PREFIX)
+#all_keys <- get_keys(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME)
 
-get_all_keys <- function(access_key_id, secret_access_key, bucket_name, prefix = NULL) {
-  path <- system.file('python', 'get_all_keys.py', package = 'rs3helper')
-  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
-  if(!is.null(prefix)) {
-    command <- paste(command, '--prefix', prefix)
-  }
-  response <- system(command, intern = TRUE)
-  fromJSON(response)
-}
+#download_files(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, PREFIX, PATTERN, get_dir_str())
 
-#get_all_keys(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, PREFIX)
-#all_keys <- get_all_keys(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME)
-
-
+#upload_file_public(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, FILE_PATH, FILE_NAME, PREFIX)

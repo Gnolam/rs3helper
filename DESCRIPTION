@@ -1,12 +1,16 @@
 Package: rs3helper
 Type: Package
-Title: What the Package Does (Title Case)
+Title: A Python backed package to manipulate S3 buckets and files
+Description: More about what it does (maybe more than one line)
 Version: 0.1
 Date: 2015-11-06
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Authors@R: person("Jaehyeon", "Kim", email="dottami@gmail.com", role = c("aut", "cre"))
+Maintainer: Jaehyeon Kim <dottami@gmail.com>
+License: GPL-2
+Depends:
+    methods
 Imports:
     jsonlite
-License: What license is it under?
+Suggests:
+VignetteBuilder: knitr
 LazyData: TRUE
