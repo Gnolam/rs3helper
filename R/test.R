@@ -8,6 +8,8 @@ FILE_PATH = 'C:\\workspace\\rs3helper'
 FILE_NAME = 'test.md'
 REGION = 'ap-southeast-2'
 
+## test
+
 ## lookup methods
 #lookup_regions()
 #lookup_locations()

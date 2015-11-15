@@ -1,3 +1,12 @@
+connect_test <- function(access_key_id, secret_access_key, region = NULL) {
+  path <- system.file('python', 'connect_test.py', package = 'rs3helper')
+  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key)
+  if(!is.null(region)) command <- paste(command, '--region', region)
+  response <- system(command, intern = TRUE)
+  #if(length(response) > 0) fromJSON(response) else 'response is NULL'
+  response
+}
+
 create_bucket <- function(access_key_id, secret_access_key, bucket, location = NULL, region = NULL) {
   path <- system.file('python', 'create_bucket.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket', bucket)
