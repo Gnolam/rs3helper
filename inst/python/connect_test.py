@@ -1,7 +1,6 @@
 import argparse
-import json
 
-from s3helpers import connect_to_s3
+from s3helper import connect_to_s3
 
 parser = argparse.ArgumentParser(description='get all keys')
 parser.add_argument('--access_key_id', required=True, type=str, help='AWS access key id')

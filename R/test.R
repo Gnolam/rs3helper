@@ -1,12 +1,12 @@
-AWS_ACCESS_KEY_ID = 'access-key-id'
-AWS_SECRET_ACCESS_KEY = 'secret-access-key'
-BUCKET_NAME = 'rs3helper'
-PREFIX = 'iris.csv'
-PREFIX = NULL
-PATTERN = NULL
-FILE_PATH = 'C:\\workspace\\rs3helper'
-FILE_NAME = 'test.md'
-REGION = 'ap-southeast-2'
+access_key_id = 'access-key-id'
+secret_access_key = 'secret-access-key'
+bucket = 'rs3helper'
+prefix = 'iris.csv'
+prefix = NULL
+pattern = NULL
+file_path = 'C:\\workspace\\rs3helper'
+file_name = 'test.md'
+region = 'ap-southeast-2'
 
 ## test
 
