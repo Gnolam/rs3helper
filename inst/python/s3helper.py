@@ -63,6 +63,8 @@ def lookup_key(conn, bucket_name, key_name):
         response = {'key': key_name, 'is_exist': None, 'message': 'connection is not made'}
     return response
 
+## add extra information
+#http://docs.ceph.com/docs/v0.80/radosgw/s3/python/
 def get_all_buckets(conn):
   if conn is not None:
       try:
@@ -76,6 +78,7 @@ def get_all_buckets(conn):
       response = 'connection is not made'
   return response
 
+## add extra information
 def get_keys(conn, bucket_name, prefix = None):
     if conn is not None:
         try:
@@ -96,6 +99,60 @@ def get_keys(conn, bucket_name, prefix = None):
             response = 'Unhandled error occurs when getting bucket'
     else:
         response = 'connection is not made'
+    return response
+
+def get_access_control_list(conn, bucket_name, key_name = None):
+    response = None
+    if conn is not None:
+        if key_name is not None:
+            try:
+                bucket = conn.get_bucket(bucket_name)
+                key = bucket.get_key(key_name)
+                acp = key.get_acl()
+            except boto.exception.S3ResponseError as re:
+                acp = None
+                response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+            except:
+                response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'Unhandled error occurs when getting acp'}
+        else:
+            try:
+                bucket = conn.get_bucket(bucket_name)
+                acp = bucket.get_acl()
+            except boto.exception.S3ResponseError as re:
+                acp = None
+                response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+            except:
+                response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'Unhandled error occurs when getting acp'}
+        if acp is not None:
+            response = [{'permission': grant.permission, 'display_name': grant.display_name, 'email_address': grant.email_address, 'id': grant.id, 'message': None} for grant in acp.acl.grants]
+    else:
+        response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'connection is not made'}
+    return response
+
+def set_access_control_list(conn, bucket_name, permission, key_name = None):
+    response = None
+    if conn is not None:
+        if key_name is not None:
+            try:
+                bucket = conn.get_bucket(bucket_name)
+                key = bucket.get_key(key_name)
+                key.set_acl(permission)
+                response = {'permission': permission, 'name': key_name, 'message': None}
+            except boto.exception.S3ResponseError as re:
+                response = {'permission': None, 'name': key_name, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+            except:
+                response = {'permission': None, 'name': key_name, 'message': 'Unhandled error occurs when setting acp'}
+        else:
+            try:
+                bucket = conn.get_bucket(bucket_name)
+                bucket.set_acl(permission)
+                response = {'permission': permission, 'name': bucket_name, 'message': None}
+            except boto.exception.S3ResponseError as re:
+                response = {'permission': None, 'name': bucket_name, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+            except:
+                response = {'permission': None, 'name': bucket_name, 'message': 'Unhandled error occurs when setting acp'}
+    else:
+        response = {'permission': permission, 'name': bucket_name, 'message': 'connection is not made'}
     return response
 
 def create_bucket(conn, bucket_name, location):
