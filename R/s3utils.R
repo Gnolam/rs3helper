@@ -122,6 +122,27 @@ get_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
   })
 }
 
+set_access_control_list <- function(access_key_id, secret_access_key, bucket_name, permission, key_name = NULL, region = NULL) {
+  if(bucket_name == '') stop('bucket_name: expected one argument')
+  if(permission == '') stop('permission: expected on argument')
+  if(!is.null(key_name)) {
+    if(key_name == '') stop('key_name: expected one argument')
+  }
+
+  path <- system.file('python', 'set_access_control_list.py', package = 'rs3helper')
+  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name, '--permission', permission)
+  if(!is.null(key_name)) command <- paste(command, '--key_name', key_name)
+  if(!is.null(region)) command <- paste(command, '--region', region)
+
+  response <- system(command, intern = TRUE)
+  tryCatch({
+    fromJSON(response)
+  }, error = function(err) {
+    warning('fails to parse JSON response')
+    response
+  })
+}
+
 # create_bucket <- function(access_key_id, secret_access_key, bucket, location = NULL, region = NULL) {
 #   path <- system.file('python', 'create_bucket.py', package = 'rs3helper')
 #   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket', bucket)
