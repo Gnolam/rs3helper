@@ -1,6 +1,69 @@
 import boto
 from boto.s3.connection import OrdinaryCallingFormat, Location
 
+def gte_connection_response(access_key_id, secret_access_key, is_ordinary_calling_format = False, region = None):
+    try:
+        if region is None:
+            if is_ordinary_calling_format:
+                conn = boto.connect_s3(access_key_id, secret_access_key, calling_format=OrdinaryCallingFormat())
+                response = (conn, None)
+            else:
+                conn = boto.connect_s3(access_key_id, secret_access_key)
+                response = (conn, None)
+        else:
+            conn = boto.s3.connect_to_region(
+               region_name = region,
+               aws_access_key_id = access_key_id,
+               aws_secret_access_key = secret_access_key,
+               calling_format = OrdinaryCallingFormat()
+               )
+            response = (conn, None)
+    except boto.exception.AWSConnectionError:
+        response = (None, 'AWS connection error')
+    return response
+
+def get_bucket_response(conn_res, bucket_name):
+    conn, res = conn_res
+    if conn is not None:
+        try:
+            bucket = conn.get_bucket(bucket_name)
+            response = (bucket, None)
+        except boto.exception.S3ResponseError as re:
+            response = (None, 'S3ResponseError = {0} {1} when getting bucket'.format(re[0], re[1]))
+        except:
+            response = (None, 'Unhandled error occurred when getting bucket')
+    else:
+        response = (None, res)
+    return response
+
+def get_key_response(bucket_res, key_name):
+    bucket, res = bucket_res
+    if bucket is not None:
+        try:
+            key = bucket.get_key(key_name)
+            response = (key, None)
+        except boto.exception.S3ResponseError as re:
+            response = (None, 'S3ResponseError = {0} {1} when getting key'.format(re[0], re[1]))
+        except:
+            response = (None, 'Unhandled error occurred when getting key')
+    else:
+        response = (None, res)
+    return response
+
+def get_bucket_list_response(bucket_res, prefix = None):
+    bucket, res = bucket_res
+    if bucket is not None:
+        try:
+            bucket_list = bucket.list(prefix) if prefix is not None else bucket.list()
+            response = (bucket_list, None)
+        except boto.exception.S3ResponseError as re:
+            response = (None, 'S3ResponseError = {0} {1} when getting bucket list'.format(re[0], re[1]))
+        except:
+            response = (None, 'Unhandled error occurred when getting bucket list')
+    else:
+        response = (None, res)
+    return response
+
 def connect_to_s3(access_key_id, secret_access_key, region = None):
     try:
         if region is None:
