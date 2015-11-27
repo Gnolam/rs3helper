@@ -1,7 +1,11 @@
+import os
+import os.path
+import re
 import ssl
 
 import boto
 from boto.s3.connection import OrdinaryCallingFormat, Location
+from boto.s3.key import Key
 
 def get_connection_response(access_key_id, secret_access_key, is_ordinary_calling_format = False, region = None):
     try:
@@ -63,19 +67,21 @@ def get_key_response(bucket_res, key_name):
 def get_bucket_list_response(bucket_res, prefix = None):
     bucket, res = bucket_res
     if bucket is not None:
-        try:
-            bucket_list = bucket.list(prefix) if prefix is not None else bucket.list()
-            if bucket_list is not None:
-                response = (bucket_list, None)
-            else:
-                response = (None, 'No element in {0}'.format(bucket.name))
-        except boto.exception.S3ResponseError as re:
-            response = (None, 'S3ResponseError = {0} {1} when getting bucket list'.format(re[0], re[1]))
-        except:
-            response = (None, 'Unhandled error occurred when getting bucket list')
+        bucket_list = bucket.list(prefix) if prefix is not None else bucket.list()
+        response = (bucket_list, None)
     else:
         response = (None, res)
     return response
+
+def count_bucket_list(bucket_list_res):
+    bucket_list, res = bucket_list_res
+    if bucket_list is not None:
+        cnt = 0
+        for key in bucket_list:
+            cnt += 1
+    else:
+        cnt = -1
+    return cnt
 
 def lookup_location():
     return [loc for loc in dir(Location) if loc[0].isupper()]
@@ -113,10 +119,13 @@ def get_all_buckets(conn_res):
 
 def get_keys(bucket_list_res):
     bucket_list, res = bucket_list_res
-    if bucket_list is not None:
+    cnt = count_bucket_list(bucket_list_res)
+    if cnt > 0:
         response = [{'key_name': key.name, 'key_size': key.size, 'modified': key.last_modified, 'message': None} for key in bucket_list]
+    elif cnt == 0:
+        response = [{'key_name': None, 'key_size': None, 'modified': None, 'message': 'No key found'}]
     else:
-        response = [{'key_name': None, 'key_size': None, 'modified': None, 'message': res} for key in bucket_list]
+        response = [{'key_name': None, 'key_size': None, 'modified': None, 'message': res}]
     return response
 
 def get_access_control_list(conn_res, bucket_name, key_name = None):
@@ -134,7 +143,7 @@ def get_access_control_list(conn_res, bucket_name, key_name = None):
             message = 'S3ResponseError = {0} {1}'.format(re[0], re[1])
         except:
             acp = None
-            message = 'Unhandled error occurs when getting acp'
+            message = 'Unhandled error occurred when getting acp'
     else:
         acp = None
         message = target_res
@@ -160,119 +169,195 @@ def set_access_control_list(conn_res, bucket_name, permission, key_name = None):
         except boto.exception.S3ResponseError as re:
             response = {'permission': permission, 'is_set': False, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
         except:
-            response = {'permission': permission, 'is_set': False, 'message': 'Unhandled error occurs when setting acp'}
+            response = {'permission': permission, 'is_set': False, 'message': 'Unhandled error occurred when setting acp'}
     else:
         response = {'permission': permission, 'is_set': False, 'message': target_res}
     return response
 
 def create_bucket(conn_res, bucket_name, location):
     conn, res = conn_res
+    loc = location if location in dir(Location) else None
     if conn is not None:
         if lookup_bucket(conn_res, bucket_name) is None:
-            ''
+            try:
+                bucket = conn.create_bucket(bucket_name, location = loc) if loc else conn.create_bucket(bucket_name)
+                response = {'bucket_name': bucket_name, 'is_created': True, 'location': loc, 'message': None}
+            except boto.exception.S3CreateError as ce:
+                response = {'bucket_name': bucket_name, 'is_created': False, 'location': loc, 'message': format(ce)}
         else:
-            response = {'bucket_name': bucket_name, 'is_created': None, 'message': 'bucket already exists'}
+            response = {'bucket_name': bucket_name, 'is_created': False, 'location': loc, 'message': 'bucket already exists'}
     else:
-        ''
+        response = {'bucket_name': bucket_name, 'is_created': False, 'location': loc, 'message': res}
+    return response
 
-# def create_bucket(conn, bucket_name, location):
-#     if conn is not None:
-#         try:
-#             bucket = conn.lookup(bucket_name)
-#             if bucket is not None:
-#                 response = 'Bucket {0} already exists'.format(bucket_name)
-#             else:
-#                 try:
-#                     loc = location if location in dir(Location) else None
-#                     bucket = conn.create_bucket(bucket_name, location = loc) if loc else conn.create(bucket_name)
-#                     response = {'is_created': True, 'bucket': bucket_name, 'message': None}
-#                 except boto.exception.S3CreateError as ce:
-#                     response = {'is_created': False, 'bucket': bucket_name, 'message': 'S3CreateError = {0} {1}'.format(ce[0], ce[1])}
-#         except boto.exception.S3ResponseError as re:
-#             response = {'is_created': False, 'bucket': bucket_name, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
-#         except:
-#             response = {'is_created': False, 'bucket': bucket_name, 'message': 'Unhandled error occurs in creating bucket'}
-#     else:
-#         response = {'is_created': False, 'bucket': bucket_name, 'message': 'connection is not made'}
-#     return response
-#
-# def delete_bucket(conn, bucket_name):
-#     if conn is not None:
-#         try:
-#             bucket = conn.get_bucket(bucket_name)
-#             for key in bucket.list():
-#                 key.delete()
-#             conn.delete_bucket(bucket_name)
-#             response = {'is_deleted': True, 'bucket': bucket_name, 'message': None}
-#         except boto.exception.S3ResponseError as re:
-#             response = {'is_deleted': False, 'bucket': bucket_name, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
-#         except:
-#             response = {'is_deleted': False, 'bucket': bucket_name, 'message': 'Unhandled error occurs in deleting the bucket'}
-#     else:
-#         response = {'is_deleted': False, 'bucket': bucket_name, 'message': 'connection is not made'}
-#     return response
-#
-# def delete_key(conn, bucket_name, prefix = None, key_name = None):
-#     if conn is not None:
-#         try:
-#             bucket = conn.get_bucket(bucket_name)
-#         except boto.exception.S3ResponseError as re:
-#             bucket = None
-#             response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': 'S3ResponseError = {0} {1} in getting bucket'.format(re[0], re[1])}
-#         except:
-#             bucket = None
-#             response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': 'Unhandled error occurs in getting bucket'}
-#         if bucket is not None:
-#             if key_name is not None:
-#                 try:
-#                     key = bucket.get_key(key_name)
-#                     if key is not None:
-#                         key.delete()
-#                         response = {'is_deleted': True, 'bucket': bucket_name, 'key': key_name, 'message': None}
-#                     else:
-#                         response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': '{0} does not exist'.format(key_name)}
-#                 except boto.exception.S3ResponseError as re:
-#                     response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': 'S3ResponseError = {0} {1} deleting key'.format(re[0], re[1])}
-#                 except:
-#                     response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': 'Unhandled error occurs in deleting key'}
-#             else:
-#                 key_names = []
-#                 try:
-#                     bucket_list = bucket.list(prefix) if prefix is not None else bucket.list()
-#                     key_names = key_names.extend([str(lst.key) for lst in bucket_list])
-#                     for key in bucket_list:
-#                         key.delete()
-#                     response = {'is_deleted': True, 'bucket': bucket_name, 'key': key_names, 'message': None}
-#                 except boto.exception.S3ResponseError as re:
-#                     response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_names, 'message': 'S3ResponseError = {0} {1} deleting keys'.format(re[0], re[1])}
-#                 except:
-#                     response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_names, 'message': 'Unhandled error occurs in deleting keys'}
-#
-#         else:
-#             response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': 'bucket is not found'}
-#     else:
-#         response = {'is_deleted': False, 'bucket': bucket_name, 'key': key_name, 'message': 'connection is not made'}
-#     return response
+def delete_bucket(conn_res, bucket_name):
+    bucket, res = get_bucket_response(conn_res, bucket_name)
+    if bucket is not None:
+        bucket_list, res = get_bucket_list_response((bucket, res))
+        cnt = count_bucket_list((bucket_list, res))
+        key_msg = None
+        if cnt > 0:
+            try:
+                for key in bucket_list:
+                    key.delete()
+            except boto.exception.S3ResponseError as re:
+                key_msg = 'S3ResponseError = {0} {1}'.format(re[0], re[1])
+            except:
+                key_msg = 'Unhandled error occurred when deleting keys'
+        conn, _ = conn_res
+        bucket_msg = None
+        try:
+            conn.delete_bucket(bucket_name)
+            response = {'bucket_name': bucket_name, 'is_deleted': True, 'prefix': prefix, 'message': None}
+        except boto.exception.S3ResponseError as re:
+            bucket_msg = 'S3ResponseError = {0} {1}'.format(re[0], re[1])
+            response = {'bucket_name': bucket_name, 'is_deleted': False, 'prefix': prefix, 'message': 'bucket: {0} || key {1}'.format(bucket_msg, key_msg)}
+        except:
+            bucket_msg = 'Unhandled error occurred when deleting bucket'
+            response = {'bucket_name': bucket_name, 'is_deleted': False, 'prefix': prefix, 'message': 'bucket: {0} || key {1}'.format(bucket_msg, key_msg)}
+    else:
+        response = {'bucket_name': bucket_name, 'is_deleted': False, 'prefix': prefix, 'message': res}
+    return response
 
-# def download_file(conn, bucket_name, prefix = None, pattern = None, key_name = None):
-#     if connection is not None:
-#         try:
-#             bucket = conn.get_bucket(bucket_name)
-#         except boto.exception.S3ResponseError as re:
-#             bucket = None
-#         except:
-#             bucket = None
-#
-#     else:
-#         'connection is not made'
+def delete_key(conn_res, bucket_name, key_name = None, prefix = None):
+    bucket, res = get_bucket_response(conn_res, bucket_name)
+    if bucket is not None:
+        if key_name is not None:
+            key, res = get_key_response((bucket, res), key_name)
+            if key is not None:
+                try:
+                    bucket.delete_key(key_name)
+                    response = {'key': key_name, 'is_deleted': True, 'num_keys': 1, 'message': None}
+                except boto.exception.S3ResponseError as re:
+                    response = {'key': key_name, 'is_deleted': False, 'num_keys': 1, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+                except:
+                    response = {'key': key_name, 'is_deleted': False, 'num_keys': 1, 'message': 'Unhandled error occurred when deleting key'}
+            else:
+                response = {'key': key_name, 'is_deleted': False, 'num_keys': 1, 'message': res}
+        else:
+            bucket_list, res = get_bucket_list_response((bucket, res), prefix)
+            cnt = count_bucket_list((bucket_list, res))
+            if cnt > 0:
+                try:
+                    for key in bucket_list:
+                        key.delete()
+                    response = {'key': key_name, 'is_deleted': True, 'num_keys': cnt, 'message': None}
+                except boto.exception.S3ResponseError as re:
+                    response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+                except:
+                    response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': 'Unhandled error occurred when deleting key'}
+            elif cnt == 0:
+                response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': 'No key is found'}
+            else:
+                response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': res}
+    else:
+        response = {'key': key_name, 'is_deleted': False, 'num_keys': None, 'message': res}
+    return response
 
+def get_filepath(file_path = None):
+    if file_path is None or not os.path.isdir(file_path):
+        filepath = os.path.expanduser('~')
+    else:
+        filepath = file_path
+    return filepath
 
+def get_filename(key_name):
+    file_name = key_name.rsplit('/')[len(key_name.rsplit('/'))-1]
+    file_name = file_name if file_name is not '' else 'file'
+    return file_name
 
+def download_file(key_res, key_name, file_path = None):
+    file_path = get_filepath(file_path)
+    file_name = get_filename(key_name)
+    key, res = key_res
+    if key is not None:
+        try:
+            key.get_contents_to_filename(os.path.join(file_path, file_name))
+            response = {'key_name': key_name, 'is_downloaded': True, 'file_path': file_path, 'file_name': file_name, 'message': None}
+        except boto.exception.S3ResponseError as re:
+            response = {'key_name': key_name, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+        except:
+            response = {'key_name': key_name, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'Unhandled error occurred when downloading file'}
+    else:
+        response = {'key_name': key_name, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': res}
+    return response
 
+def download_files(conn_res, bucket_name, file_path = None, key_name = None, pattern = None, prefix = None):
+    bucket_res = get_bucket_response(conn_res, bucket_name)
+    response = []
+    if key_name is not None:
+        key_res = get_key_response(bucket_res, key_name)
+        response.append(download_file(key_res, key_name, file_path))
+    else:
+        bucket_list, res = get_bucket_list_response(bucket_res, prefix)
+        cnt = count_bucket_list((bucket_list, res))
+        if cnt > 0:
+            pattern = pattern if pattern is not None else '.+'
+            for key in bucket_list:
+                key_str = str(key.key)
+                response.append(download_file((key, key_str), key_str, file_path))
+        elif cnt == 0:
+            response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'no key is found'})
+        else:
+            response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': res})
 
+def upload_file(conn_res, bucket_name, file_path, file_name, prefix):
+    full_path = os.path.join(file_path, file_name)
+    if os.path.isfile(full_path):
+        if prefix is None or prefix is '':
+            prefix = '/'
+        elif prefix[0:1] is not '/':
+            prefix = '/' + prefix
+        else:
+            prefix = prefix
+        bucket, res = get_bucket_response(conn_res, bucket_name)
+        if bucket is not None:
+            full_key_name = os.path.join(prefix, file_name).replace('\\', '/')
+            key = bucket.new_key(full_key_name)
+            try:
+                key.set_contents_from_filename(os.path.join(file_path, file_name))
+                response = {'file_name': file_name, 'is_uploaded': True, 'key_name': full_key_name, 'message': None}
+            except boto.exception.S3ResponseError as re:
+                response = {'file_name': file_name, 'is_uploaded': False, 'key_name': None, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+            except:
+                response = {'file_name': file_name, 'is_uploaded': False, 'key_name': None, 'message': 'Unhandled error occurred when uploading file'}
+        else:
+            response = {'file_name': file_name, 'is_uploaded': False, 'key_name': None, 'message': res}
+    else:
+        response = {'file_name': file_name, 'is_uploaded': False, 'key_name': None, 'message': 'file is not found'}
+    return response
 
+def copy_file(conn_res, src_bucket_name, src_key_name, dst_bucket_name, dst_key_name):
+    src_bucket_res = get_bucket_response(conn_res, src_bucket_name)
+    src_key, src_res = get_key_response(src_key_res, src_key_name)
+    if src_key is not None:
+        dst_bucket, dst_res = get_bucket_response(conn_res, dst_bucket_name)
+        if dst_bucket is not None:
+            try:
+                src_key.copy(dst_bucket_name, dst_key_name, preserve_acl=True)
+                response = {'src_key_name': src_key_name, 'is_copied': True, 'dst_key_name': dst_key_name, 'message': None}
+            except boto.exception.S3ResponseError as re:
+                response = {'src_key_name': src_key_name, 'is_copied': False, 'dst_key_name': None, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+            except:
+                response = {'src_key_name': src_key_name, 'is_copied': False, 'dst_key_name': None, 'message': 'Unhandled error occurred when copying key'}
+        else:
+            response = {'src_key_name': src_key_name, 'is_copied': False, 'dst_key_name': None, 'message': 'Destination bucket does not exist'}
+    else:
+        response = {'src_key_name': src_key_name, 'is_copied': False, 'dst_key_name': None, 'message': src_res}
+    return response
 
-
-
+def generate_url(bucket_res, key_name, seconds):
+    key, res = get_key_response(bucket_res, key_name)
+    if key is not None:
+        try:
+            url = key.generate_url(seconds)
+            response = {'key_name': key_name, 'has_url': True, 'url': url, 'message': None}
+        except boto.exception.S3ResponseError as re:
+            response = {'key_name': key_name, 'has_url': False, 'url': None, 'message': 'S3ResponseError = {0} {1}'.format(re[0], re[1])}
+        except:
+            response = {'key_name': key_name, 'has_url': False, 'url': None, 'message': 'Unhandled error occurred when generating url'}
+    else:
+        response = {'key_name': key_name, 'has_url': False, 'url': None, 'message': res}
+    return response
 
 
