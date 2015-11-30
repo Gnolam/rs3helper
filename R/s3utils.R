@@ -180,7 +180,7 @@ create_bucket <- function(access_key_id, secret_access_key, bucket_name, locatio
   })
 }
 
-create_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordinary_calling_format = FALSE, region = NULL) {
+delete_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
 
   path <- system.file('python', 'delete_bucket.py', package = 'rs3helper')
