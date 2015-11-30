@@ -208,15 +208,15 @@ def delete_bucket(conn_res, bucket_name):
         bucket_msg = None
         try:
             conn.delete_bucket(bucket_name)
-            response = {'bucket_name': bucket_name, 'is_deleted': True, 'prefix': prefix, 'message': None}
+            response = {'bucket_name': bucket_name, 'is_deleted': True, 'message': None}
         except boto.exception.S3ResponseError as re:
             bucket_msg = 'S3ResponseError = {0} {1}'.format(re[0], re[1])
-            response = {'bucket_name': bucket_name, 'is_deleted': False, 'prefix': prefix, 'message': 'bucket: {0} || key {1}'.format(bucket_msg, key_msg)}
+            response = {'bucket_name': bucket_name, 'is_deleted': False, 'message': 'bucket: {0} || key {1}'.format(bucket_msg, key_msg)}
         except:
             bucket_msg = 'Unhandled error occurred when deleting bucket'
-            response = {'bucket_name': bucket_name, 'is_deleted': False, 'prefix': prefix, 'message': 'bucket: {0} || key {1}'.format(bucket_msg, key_msg)}
+            response = {'bucket_name': bucket_name, 'is_deleted': False, 'message': 'bucket: {0} || key {1}'.format(bucket_msg, key_msg)}
     else:
-        response = {'bucket_name': bucket_name, 'is_deleted': False, 'prefix': prefix, 'message': res}
+        response = {'bucket_name': bucket_name, 'is_deleted': False, 'message': res}
     return response
 
 def delete_key(conn_res, bucket_name, key_name = None, prefix = None):
