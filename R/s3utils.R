@@ -1,15 +1,28 @@
-connect_test <- function(access_key_id, secret_access_key, region = NULL) {
+get_dir_str <- function(dir_str = getwd()) {
+  if (length(grep('[w|W]in', Sys.info()['sysname'])) > 0) {
+    gsub('/', '\\\\', dir_str)
+  } else {
+    gsub('\\\\', '/', dir_str)
+  }
+}
+
+set_file_path <- function(file_path = getwd(), file_name = NULL) {
+  full_path <- if(!is.null(file_name)) file.path(file_path, file_name) else file_path
+  get_dir_str(full_path)
+}
+
+convert_bool <- function(bool) {
+  if(bool) 'True' else 'False'
+}
+
+connect_test <- function(access_key_id, secret_access_key, is_ordinary_calling_format = FALSE, region = NULL) {
   path <- system.file('python', 'connect_test.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)
-  tryCatch({
-    fromJSON(response)
-  }, error = function(err) {
-    warning('fails to parse JSON response')
-    response
-  })
+  response
 }
 
 lookup_location <- function() {
@@ -38,11 +51,12 @@ lookup_region <- function() {
   })
 }
 
-lookup_bucket <- function(access_key_id, secret_access_key, bucket_name, region = NULL) {
+lookup_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
 
   path <- system.file('python', 'lookup_bucket.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)
@@ -54,12 +68,13 @@ lookup_bucket <- function(access_key_id, secret_access_key, bucket_name, region 
   })
 }
 
-lookup_key <- function(access_key_id, secret_access_key, bucket_name, key_name, region = NULL) {
+lookup_key <- function(access_key_id, secret_access_key, bucket_name, key_name, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
   if(key_name == '') stop('key_name: expected one argument')
 
-  path <- system.file('python', 'lookup_bucket.py', package = 'rs3helper')
-  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
+  path <- system.file('python', 'lookup_key.py', package = 'rs3helper')
+  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name, '--key_name', key_name)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)
@@ -71,9 +86,10 @@ lookup_key <- function(access_key_id, secret_access_key, bucket_name, key_name, 
   })
 }
 
-get_all_buckets <- function(access_key_id, secret_access_key, region = NULL) {
+get_all_buckets <- function(access_key_id, secret_access_key, is_ordinary_calling_format = FALSE, region = NULL) {
   path <- system.file('python', 'get_all_buckets.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)
@@ -85,12 +101,13 @@ get_all_buckets <- function(access_key_id, secret_access_key, region = NULL) {
   })
 }
 
-get_keys <- function(access_key_id, secret_access_key, bucket_name, prefix = NULL, region = NULL) {
+get_keys <- function(access_key_id, secret_access_key, bucket_name, prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
 
   path <- system.file('python', 'get_keys.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
   if(!is.null(prefix)) command <- paste(command, '--prefix', prefix)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)
@@ -102,7 +119,7 @@ get_keys <- function(access_key_id, secret_access_key, bucket_name, prefix = NUL
   })
 }
 
-get_access_control_list <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, region = NULL) {
+get_access_control_list <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
   if(!is.null(key_name)) {
     if(key_name == '') stop('key_name: expected one argument')
@@ -111,6 +128,7 @@ get_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
   path <- system.file('python', 'get_access_control_list.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
   if(!is.null(key_name)) command <- paste(command, '--key_name', key_name)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)
@@ -122,7 +140,7 @@ get_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
   })
 }
 
-set_access_control_list <- function(access_key_id, secret_access_key, bucket_name, permission, key_name = NULL, region = NULL) {
+set_access_control_list <- function(access_key_id, secret_access_key, bucket_name, permission, key_name = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
   if(permission == '') stop('permission: expected on argument')
   if(!is.null(key_name)) {
@@ -132,6 +150,42 @@ set_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
   path <- system.file('python', 'set_access_control_list.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name, '--permission', permission)
   if(!is.null(key_name)) command <- paste(command, '--key_name', key_name)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
+  if(!is.null(region)) command <- paste(command, '--region', region)
+
+  response <- system(command, intern = TRUE)
+  tryCatch({
+    fromJSON(response)
+  }, error = function(err) {
+    warning('fails to parse JSON response')
+    response
+  })
+}
+
+create_bucket <- function(access_key_id, secret_access_key, bucket_name, location = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
+  if(bucket_name == '') stop('bucket_name: expected one argument')
+
+  path <- system.file('python', 'create_bucket.py', package = 'rs3helper')
+  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
+  if(!is.null(location)) command <- paste(command, '--location', location)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
+  if(!is.null(region)) command <- paste(command, '--region', region)
+
+  response <- system(command, intern = TRUE)
+  tryCatch({
+    fromJSON(response)
+  }, error = function(err) {
+    warning('fails to parse JSON response')
+    response
+  })
+}
+
+create_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordinary_calling_format = FALSE, region = NULL) {
+  if(bucket_name == '') stop('bucket_name: expected one argument')
+
+  path <- system.file('python', 'delete_bucket.py', package = 'rs3helper')
+  command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
+  if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
   response <- system(command, intern = TRUE)

@@ -174,7 +174,7 @@ def set_access_control_list(conn_res, bucket_name, permission, key_name = None):
         response = {'permission': permission, 'is_set': False, 'message': target_res}
     return response
 
-def create_bucket(conn_res, bucket_name, location):
+def create_bucket(conn_res, bucket_name, location = None):
     conn, res = conn_res
     loc = location if location in dir(Location) else None
     if conn is not None:
