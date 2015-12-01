@@ -11,6 +11,6 @@ Depends:
     methods
 Imports:
     jsonlite
-Suggests:
 VignetteBuilder: knitr
 LazyData: TRUE
+RoxygenNote: 5.0.1
