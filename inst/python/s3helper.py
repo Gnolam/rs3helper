@@ -301,7 +301,7 @@ def download_files(conn_res, bucket_name, file_path = None, key_name = None, pat
         else:
             response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': res})
 
-def upload_file(conn_res, bucket_name, file_path, file_name, prefix):
+def upload_file(conn_res, bucket_name, file_path, file_name, prefix = None):
     full_path = os.path.join(file_path, file_name)
     if os.path.isfile(full_path):
         if prefix is None or prefix is '':
