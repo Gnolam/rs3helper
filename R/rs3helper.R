@@ -15,5 +15,4 @@
 #'
 #' @name rs3helper
 #' @import jsonlite
-#' @import pryr
 NULL

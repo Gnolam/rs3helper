@@ -655,11 +655,13 @@ generate_url <- function(access_key_id, secret_access_key, bucket_name, key_name
 
 #' Wrapper of other functions
 #'
-#' \code{rs3wrapper} returns a functional with connection related arguments pre-filled.
+#' \code{rs3wrapper} returns a function where connection related arguments are pre-filled.
 #'
 #'
-#' The following 4 connection related variables are repeated in almost all functions and their values can be applied at once using this functions.
-#' A partially applied functional is returned where the 4 values are pre-filled by executing \code{rs3wrapper}. Then a function and its argument can be entered in each of the two braces.
+#' The following 4 connection related arguments are required in all functions:\code{access_key_id}, \code{secret_access_key}, \code{is_ordinary_calling_format} and \code{region}.
+#' The arguments can be pre-filled at once using this function. A function that has a function argument(\code{f}) and unspecified arguments (\code{...}) is returned.
+#' Then it is possible to execute a function with the remaining arguments.
+#'
 #'
 #' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 #'
@@ -667,18 +669,19 @@ generate_url <- function(access_key_id, secret_access_key, bucket_name, key_name
 #' @param secret_access_key AWS secret access key
 #' @param is_ordinary_calling_format Connection calling format
 #' @param region Connection region
-#' @return a wrapper functional of other functions
+#' @return a wrapper function (\code{function(f, ...)})
 #' @export
 #' @examples
 #' \dontrun{
 #'
 #'wrapper <- rs3wrapper('access-key-id', 'secret-access-key')
-#'wrapper(get_all_buckets)()
-#'wrapper(lookup_bucket)(bucket_name = 'bucket-name')
+#'wrapper(get_all_buckets) # no remaining argument
+#'wrapper(lookup_bucket, bucket_name = 'bucket-name') # bucket_name is specified
+#'wrapper(lookup_key, 'bucket-name', 'key-name') # bucket_name and key_name are specified in order
 #' }
 rs3wrapper <- function(access_key_id, secret_access_key, is_ordinary_calling_format = FALSE, region = NULL) {
-  function(f) {
-    pryr::partial(f, access_key_id = access_key_id, secret_access_key = secret_access_key, is_ordinary_calling_format = is_ordinary_calling_format, region = region)
+  function(f, ...) {
+    f(access_key_id = access_key_id, secret_access_key = secret_access_key, is_ordinary_calling_format = is_ordinary_calling_format, region = region, ...)
   }
 }
 
