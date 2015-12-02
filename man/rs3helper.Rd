@@ -6,8 +6,8 @@
 \description{
 \code{rs3helper} is a collection of functions on AWS S3.
 Each function is backed by a Python script that performs an action on the boto library - boto is probably the most popular interface to Amazon Web Services in Python.
-In this regards, this package can be considered as a Python port of boto S3 library.
-For those who are interested in native R, please see the aws.s3 package of the cloudyr project.
+In this regards, this package can be considered as a Python wrapper of boto S3 library.
+For those who are interested in a native R package, see the aws.s3 package of the cloudyr project.
 }
 \details{
 Further details on boto and aws.s3 can be found below.

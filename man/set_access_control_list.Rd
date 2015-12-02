@@ -28,7 +28,7 @@ a list of access control set up information
 \code{set_access_control_list} sets a 'canned' access control list.
 }
 \details{
-The following access control (or permission) values are accepted: private, public-read, public-read-write, authenticated-read. See \link{https://boto.readthedocs.org/en/2.6.0/s3_tut.html} for further details.
+The following access control (or permission) values are accepted: private, public-read, public-read-write, authenticated-read. See \url{https://boto.readthedocs.org/en/2.6.0/s3_tut.html} for further details.
 
 For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }

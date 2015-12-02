@@ -24,7 +24,7 @@ connection string
 }
 \details{
 AWS key pairs are necessary. For accessing a bucket whose name is non-DNS compliant, set \code{is_ordinary_calling_format} to be \code{TRUE}.
-For example, if a bucket name contains a dot(.) or includes both small and capital letters, it is not DNS compliant. For details, see \link{http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html}).
+For example, if a bucket name contains a dot(.) or includes both small and capital letters, it is not DNS compliant. For details, see \url{http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html}).
 Connection can also be made in a specific region. Check available regions by running \link{lookup_region}.
 }
 \examples{
