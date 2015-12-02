@@ -123,7 +123,7 @@ def get_keys(bucket_list_res):
     if cnt > 0:
         response = [{'key_name': key.name, 'key_size': key.size, 'modified': key.last_modified, 'message': None} for key in bucket_list]
     elif cnt == 0:
-        response = [{'key_name': None, 'key_size': None, 'modified': None, 'message': 'No key found'}]
+        response = [{'key_name': None, 'key_size': None, 'modified': None, 'message': 'key is not found'}]
     else:
         response = [{'key_name': None, 'key_size': None, 'modified': None, 'message': res}]
     return response
@@ -150,7 +150,7 @@ def get_access_control_list(conn_res, bucket_name, key_name = None):
     if acp is not None:
         response = [{'permission': grant.permission, 'display_name': grant.display_name, 'email_address': grant.email_address, 'id': grant.id, 'message': message} for grant in acp.acl.grants]
         if len(response) == 0:
-            response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'no acl element'}
+            response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': 'acl element is not found'}
     else:
         response = {'permission': None, 'display_name': None, 'email_address': None, 'id': None, 'message': message}
     return response
@@ -178,12 +178,12 @@ def create_bucket(conn_res, bucket_name, location = None):
     conn, res = conn_res
     loc = location if location in dir(Location) else None
     if conn is not None:
-        if lookup_bucket(conn_res, bucket_name) is None:
+        if not lookup_bucket(conn_res, bucket_name)['is_exists']:
             try:
                 bucket = conn.create_bucket(bucket_name, location = loc) if loc else conn.create_bucket(bucket_name)
                 response = {'bucket_name': bucket_name, 'is_created': True, 'location': loc, 'message': None}
             except boto.exception.S3CreateError as ce:
-                response = {'bucket_name': bucket_name, 'is_created': False, 'location': loc, 'message': format(ce)}
+                response = {'bucket_name': bucket_name, 'is_created': False, 'location': loc, 'message': 'S3CreateError = {0} {1} {2}'.format(ce[0], ce[1], ce[2])}
         else:
             response = {'bucket_name': bucket_name, 'is_created': False, 'location': loc, 'message': 'bucket already exists'}
     else:
@@ -219,7 +219,7 @@ def delete_bucket(conn_res, bucket_name):
         response = {'bucket_name': bucket_name, 'is_deleted': False, 'message': res}
     return response
 
-def delete_key(conn_res, bucket_name, key_name = None, prefix = None):
+def delete_keys(conn_res, bucket_name, key_name = None, prefix = None):
     bucket, res = get_bucket_response(conn_res, bucket_name)
     if bucket is not None:
         if key_name is not None:
@@ -247,7 +247,7 @@ def delete_key(conn_res, bucket_name, key_name = None, prefix = None):
                 except:
                     response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': 'Unhandled error occurred when deleting key'}
             elif cnt == 0:
-                response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': 'No key is found'}
+                response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': 'key is not found'}
             else:
                 response = {'key': key_name, 'is_deleted': False, 'num_keys': cnt, 'message': res}
     else:
@@ -295,11 +295,15 @@ def download_files(conn_res, bucket_name, file_path = None, key_name = None, pat
             pattern = pattern if pattern is not None else '.+'
             for key in bucket_list:
                 key_str = str(key.key)
-                response.append(download_file((key, key_str), key_str, file_path))
+                if re.search(pattern, key_str) is not None:
+                    response.append(download_file((key, key_str), key_str, file_path))
+            if len(response) == 0:
+                response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'key that matches the pattern is not found'})
         elif cnt == 0:
-            response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'no key is found'})
+            response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'key is not found in the bucket'})
         else:
             response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': res})
+    return response
 
 def upload_file(conn_res, bucket_name, file_path, file_name, prefix = None):
     full_path = os.path.join(file_path, file_name)
@@ -329,7 +333,7 @@ def upload_file(conn_res, bucket_name, file_path, file_name, prefix = None):
 
 def copy_file(conn_res, src_bucket_name, src_key_name, dst_bucket_name, dst_key_name):
     src_bucket_res = get_bucket_response(conn_res, src_bucket_name)
-    src_key, src_res = get_key_response(src_key_res, src_key_name)
+    src_key, src_res = get_key_response(src_bucket_res, src_key_name)
     if src_key is not None:
         dst_bucket, dst_res = get_bucket_response(conn_res, dst_bucket_name)
         if dst_bucket is not None:
