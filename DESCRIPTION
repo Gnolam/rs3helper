@@ -8,9 +8,10 @@ Authors@R: person("Jaehyeon", "Kim", email="dottami@gmail.com", role = c("aut", 
 Maintainer: Jaehyeon Kim <dottami@gmail.com>
 License: GPL-2
 Depends:
-    methods
+  R (>= 3.1.0)
 Imports:
-    jsonlite
+  jsonlite,
+  pryr
 VignetteBuilder: knitr
 LazyData: TRUE
 RoxygenNote: 5.0.1
