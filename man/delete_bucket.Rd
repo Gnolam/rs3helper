@@ -2,20 +2,35 @@
 % Please edit documentation in R/s3utils.R
 \name{delete_bucket}
 \alias{delete_bucket}
-\title{Delete bucket}
+\title{Delete S3 bucket}
 \usage{
 delete_bucket(access_key_id, secret_access_key, bucket_name,
   is_ordinary_calling_format = FALSE, region = NULL)
 }
 \arguments{
-\item{param}{param}
+\item{access_key_id}{AWS access key id}
+
+\item{secret_access_key}{AWS secret access key}
+
+\item{bucket_name}{S3 bucket name}
+
+\item{is_ordinary_calling_format}{Connection calling format}
+
+\item{region}{Connection region}
+}
+\value{
+a list of bucket deletion information
 }
 \description{
-\code{delete_bucket}
+\code{delete_bucket} deletes a bucket.
+}
+\details{
+For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }
 \examples{
 \dontrun{
 
+delete_bucket('aws-access-id', 'secret-access-key', 'bucket-name')
 }
 }
 

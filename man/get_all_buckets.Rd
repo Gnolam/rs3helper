@@ -2,20 +2,33 @@
 % Please edit documentation in R/s3utils.R
 \name{get_all_buckets}
 \alias{get_all_buckets}
-\title{Get all buckets}
+\title{Get all S3 buckets}
 \usage{
 get_all_buckets(access_key_id, secret_access_key,
   is_ordinary_calling_format = FALSE, region = NULL)
 }
 \arguments{
-\item{param}{param}
+\item{access_key_id}{AWS access key id}
+
+\item{secret_access_key}{AWS secret access key}
+
+\item{is_ordinary_calling_format}{Connection calling format}
+
+\item{region}{Connection region}
+}
+\value{
+a data frame of bucket information
 }
 \description{
-\code{get_all_buckets}
+\code{get_all_buckets} shows information of all buckets.
+}
+\details{
+For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }
 \examples{
 \dontrun{
 
+get_all_buckets('aws-access-id', 'secret-access-key')
 }
 }
 

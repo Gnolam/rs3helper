@@ -2,20 +2,40 @@
 % Please edit documentation in R/s3utils.R
 \name{get_keys}
 \alias{get_keys}
-\title{Get keys}
+\title{Get S3 keys}
 \usage{
 get_keys(access_key_id, secret_access_key, bucket_name, prefix = NULL,
   is_ordinary_calling_format = FALSE, region = NULL)
 }
 \arguments{
-\item{param}{param}
+\item{access_key_id}{AWS access key id}
+
+\item{secret_access_key}{AWS secret access key}
+
+\item{bucket_name}{S3 bucket name}
+
+\item{prefix}{prefix that filters keys}
+
+\item{is_ordinary_calling_format}{Connection calling format}
+
+\item{region}{Connection region}
+}
+\value{
+a data frame of key information
 }
 \description{
-\code{get_keys}
+\code{get_keys} shows information of keys in a bucket.
+}
+\details{
+Keys can be filtered by \code{prefix}. For example, only the keys in a subfolder can be returned by selecting the subfolder's name as a prefix.
+
+For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }
 \examples{
 \dontrun{
 
+get_keys('aws-access-id', 'secret-access-key', 'bucket-name')
+get_keys('aws-access-id', 'secret-access-key', 'bucket-name', 'prefix')
 }
 }
 

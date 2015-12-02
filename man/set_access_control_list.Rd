@@ -9,14 +9,34 @@ set_access_control_list(access_key_id, secret_access_key, bucket_name,
   region = NULL)
 }
 \arguments{
-\item{param}{param}
+\item{access_key_id}{AWS access key id}
+
+\item{secret_access_key}{AWS secret access key}
+
+\item{bucket_name}{S3 bucket name}
+
+\item{key_name}{S3 key name}
+
+\item{is_ordinary_calling_format}{Connection calling format}
+
+\item{region}{Connection region}
+}
+\value{
+a list of access control set up information
 }
 \description{
-\code{set_access_control_list}
+\code{set_access_control_list} sets a 'canned' access control list.
+}
+\details{
+The following access control (or permission) values are accepted: private, public-read, public-read-write, authenticated-read. See \link{https://boto.readthedocs.org/en/2.6.0/s3_tut.html} for further details.
+
+For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }
 \examples{
 \dontrun{
 
+set_access_control_list('aws-access-id', 'secret-access-key', 'bucket-name')
+set_access_control_list('aws-access-id', 'secret-access-key', 'bucket-name', 'key-name')
 }
 }
 

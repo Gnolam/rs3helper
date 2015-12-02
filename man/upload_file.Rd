@@ -2,20 +2,45 @@
 % Please edit documentation in R/s3utils.R
 \name{upload_file}
 \alias{upload_file}
-\title{Upload file}
+\title{Upload file to S3}
 \usage{
 upload_file(access_key_id, secret_access_key, bucket_name, file_path, file_name,
   prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL)
 }
 \arguments{
-\item{param}{param}
+\item{access_key_id}{AWS access key id}
+
+\item{secret_access_key}{AWS secret access key}
+
+\item{bucket_name}{S3 bucket name}
+
+\item{file_path}{folder path}
+
+\item{file_name}{file name}
+
+\item{prefix}{prefix that filters keys}
+
+\item{is_ordinary_calling_format}{Connection calling format}
+
+\item{region}{Connection region}
+}
+\value{
+a list of content upload information
 }
 \description{
-\code{upload_file}
+\code{upload_file} uploads a file
+}
+\details{
+If \code{prefix} is \code{NULL}, the content is uploaded to the root of the bucket. \code{prefix} should be provided to upload to a necessary location.
+For example, if a file should be uploaded to a subfolder, \code{prefix} should be the name of the subfolder.
+
+For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }
 \examples{
 \dontrun{
 
+upload_file('aws-access-key', 'secret-access-key', 'bucket-name', file_path = set_file_path(), file_name = 'file-name')
+upload_file('aws-access-key', 'secret-access-key', 'bucket-name', file_path = set_file_path(), file_name = 'file-name', prefix = 'subfolder')
 }
 }
 

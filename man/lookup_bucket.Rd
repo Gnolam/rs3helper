@@ -2,7 +2,7 @@
 % Please edit documentation in R/s3utils.R
 \name{lookup_bucket}
 \alias{lookup_bucket}
-\title{Lookup bucket}
+\title{Lookup S3 bucket}
 \usage{
 lookup_bucket(access_key_id, secret_access_key, bucket_name,
   is_ordinary_calling_format = FALSE, region = NULL)
@@ -18,13 +18,19 @@ lookup_bucket(access_key_id, secret_access_key, bucket_name,
 
 \item{region}{Connection region}
 }
+\value{
+a list of reponse including status
+}
 \description{
-\code{lookup_bucket} checks whether the given bucket exists. If the bucket name is non-DNS compliant, set \code{is_ordinary_calling_format} to be \code{TRUE}.
-See \link{connect_test} for further details.
+\code{lookup_bucket} checks whether a bucket exists.
+}
+\details{
+For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 }
 \examples{
 \dontrun{
 
+lookup_bucket('aws-access-id', 'secret-access-key', 'bucket-name')
 }
 }
 

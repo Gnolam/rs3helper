@@ -2,7 +2,7 @@
 % Please edit documentation in R/s3utils.R
 \name{connect_test}
 \alias{connect_test}
-\title{Connection test}
+\title{S3 connection test}
 \usage{
 connect_test(access_key_id, secret_access_key,
   is_ordinary_calling_format = FALSE, region = NULL)
@@ -20,12 +20,12 @@ connect_test(access_key_id, secret_access_key,
 connection string
 }
 \description{
-\code{connect_test} is a quick function to test connection to AWS. AWS key pairs are necessary.
-For accessing a bucket that is non-DNS complicant, set \code{is_ordinary_calling_format} to be \code{TRUE}.
-For example, if a bucket name contains a dot(.) or is mixed-character, it is not DNS compliant. For details, see \link{http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html}).
+\code{connect_test} is a function to test connection to AWS.
 }
 \details{
-Connection can also be made in a specific region. Check available regions in \link{lookup_region}.
+AWS key pairs are necessary. For accessing a bucket whose name is non-DNS compliant, set \code{is_ordinary_calling_format} to be \code{TRUE}.
+For example, if a bucket name contains a dot(.) or includes both small and capital letters, it is not DNS compliant. For details, see \link{http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html}).
+Connection can also be made in a specific region. Check available regions by running \link{lookup_region}.
 }
 \examples{
 \dontrun{

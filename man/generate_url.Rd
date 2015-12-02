@@ -8,14 +8,30 @@ generate_url(access_key_id, secret_access_key, bucket_name, key_name, seconds,
   is_ordinary_calling_format = FALSE, region = NULL)
 }
 \arguments{
-\item{param}{param}
+\item{access_key_id}{AWS access key id}
+
+\item{secret_access_key}{AWS secret access key}
+
+\item{bucket_name}{S3 bucket name}
+
+\item{key_name}{S3 key name}
+
+\item{seconds}{Time in seconds}
+
+\item{is_ordinary_calling_format}{Connection calling format}
+
+\item{region}{Connection region}
+}
+\value{
+a list of content upload information
 }
 \description{
-\code{generate_url}
+\code{generate_url} generates a URL for a S3 object given amount of time in second.
 }
 \examples{
 \dontrun{
 
+generate_url('aws-access-key', 'secret-access-key', 'bucket-name', 'key-name', 30)
 }
 }
 
