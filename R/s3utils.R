@@ -40,12 +40,14 @@ convert_bool <- function(bool) {
   if(bool) 'True' else 'False'
 }
 
-#' Connection test
+#' S3 connection test
 #'
-#' \code{connect_test} is a quick function to test connection to AWS. AWS key pairs are necessary.
-#' For accessing a bucket whose name is non-DNS compliant, set \code{is_ordinary_calling_format} to be \code{TRUE}.
-#' For example, if a bucket name contains a dot(.) or is mixed-character, it is not DNS compliant. For details, see \link{http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html}).
-#' Connection can also be made in a specific region. Check available regions in \link{lookup_region}.
+#' \code{connect_test} is a function to test connection to AWS.
+#'
+#'
+#' AWS key pairs are necessary. For accessing a bucket whose name is non-DNS compliant, set \code{is_ordinary_calling_format} to be \code{TRUE}.
+#' For example, if a bucket name contains a dot(.) or includes both small and capital letters, it is not DNS compliant. For details, see \url{http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html}).
+#' Connection can also be made in a specific region. Check available regions by running \link{lookup_region}.
 #'
 #' @param access_key_id AWS access key id
 #' @param secret_access_key AWS secret access key
@@ -80,7 +82,7 @@ lookup_location <- function() {
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
@@ -99,16 +101,19 @@ lookup_region <- function() {
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Lookup bucket
+#' Lookup S3 bucket
 #'
-#' \code{lookup_bucket} checks whether a bucket exists. For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#' \code{lookup_bucket} checks whether a bucket exists.
+#'
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 #'
 #' @param access_key_id AWS access key id
 #' @param secret_access_key AWS secret access key
@@ -132,16 +137,19 @@ lookup_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordi
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Lookup key
+#' Lookup S3 key
 #'
-#' \code{lookup_key} checks whether a key exists in a bucket. For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#' \code{lookup_key} checks whether a key exists in a bucket.
+#'
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 #'
 #' @param access_key_id AWS access key id
 #' @param secret_access_key AWS secret access key
@@ -167,16 +175,19 @@ lookup_key <- function(access_key_id, secret_access_key, bucket_name, key_name, 
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Get all buckets
+#' Get all S3 buckets
 #'
-#' \code{get_all_buckets} returns all buckets. For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#' \code{get_all_buckets} shows information of all buckets.
+#'
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 #'
 #' @param access_key_id AWS access key id
 #' @param secret_access_key AWS secret access key
@@ -197,22 +208,26 @@ get_all_buckets <- function(access_key_id, secret_access_key, is_ordinary_callin
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Get keys
+#' Get S3 keys
 #'
-#' \code{get_keys} returns information on keys in a bucket. Keys can be filtered by \code{prefix}. For example, only the keys in a subfolder can be returned by selecting the subfolder's name as a prefix.
+#' \code{get_keys} shows information of keys in a bucket.
+#'
+#'
+#' Keys can be filtered by \code{prefix}. For example, only the keys in a subfolder can be returned by selecting the subfolder's name as a prefix.
+#'
 #' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
 #'
 #' @param access_key_id AWS access key id
 #' @param secret_access_key AWS secret access key
 #' @param bucket_name S3 bucket name
-#' @param prefix prefix to filter keys
+#' @param prefix prefix that filters keys
 #' @param is_ordinary_calling_format Connection calling format
 #' @param region Connection region
 #' @return a data frame of key information
@@ -234,7 +249,7 @@ get_keys <- function(access_key_id, secret_access_key, bucket_name, prefix = NUL
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
@@ -243,14 +258,26 @@ get_keys <- function(access_key_id, secret_access_key, bucket_name, prefix = NUL
 
 #' Get access control list
 #'
-#' \code{get_access_control_list} returns
+#' \code{get_access_control_list} shows permission information.
 #'
-#' @param param param
-#' @return
+#'
+#' If \code{key_name} is \code{NULL}, the bucket's permission information is shown - otherwise the key's permission info.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param key_name S3 key name
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a data frame of access control information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'get_access_control_list('aws-access-id', 'secret-access-key', 'bucket-name')
+#'get_access_control_list('aws-access-id', 'secret-access-key', 'bucket-name', 'key-name')
 #' }
 get_access_control_list <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
@@ -266,7 +293,7 @@ get_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
@@ -275,14 +302,26 @@ get_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
 
 #' Set access control list
 #'
-#' \code{set_access_control_list}
+#' \code{set_access_control_list} sets a 'canned' access control list.
 #'
-#' @param param param
-#' @return
+#'
+#' The following access control (or permission) values are accepted: private, public-read, public-read-write, authenticated-read. See \url{https://boto.readthedocs.org/en/2.6.0/s3_tut.html} for further details.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param key_name S3 key name
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of access control set up information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'set_access_control_list('aws-access-id', 'secret-access-key', 'bucket-name')
+#'set_access_control_list('aws-access-id', 'secret-access-key', 'bucket-name', 'key-name')
 #' }
 set_access_control_list <- function(access_key_id, secret_access_key, bucket_name, permission, key_name = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
@@ -299,23 +338,35 @@ set_access_control_list <- function(access_key_id, secret_access_key, bucket_nam
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Create bucket
+#' Create S3 bucket
 #'
-#' \code{create_bucket}
+#' \code{create_bucket} creates a S3 bucket.
 #'
-#' @param param param
-#' @return
+#'
+#' A bucket can be created in a different location by specifying \code{location} - see \link{get_location}.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param location S3 location
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of bucket creation information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'create_bucket('aws-access-id', 'secret-access-key', 'bucket-name')
+#'create_bucket('aws-access-id', 'secret-access-key', 'bucket-name', 'location')
 #' }
 create_bucket <- function(access_key_id, secret_access_key, bucket_name, location = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
@@ -328,23 +379,31 @@ create_bucket <- function(access_key_id, secret_access_key, bucket_name, locatio
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Delete bucket
+#' Delete S3 bucket
 #'
-#' \code{delete_bucket}
+#' \code{delete_bucket} deletes a bucket.
 #'
-#' @param param param
-#' @return
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of bucket deletion information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'delete_bucket('aws-access-id', 'secret-access-key', 'bucket-name')
 #' }
 delete_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
@@ -356,31 +415,45 @@ delete_bucket <- function(access_key_id, secret_access_key, bucket_name, is_ordi
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Delete key
+#' Delete S3 key
 #'
-#' \code{delete_key}
+#' \code{delete_keys} deletes a key or keys.
 #'
-#' @param param param
-#' @return
+#'
+#' If \code{key_name} is provided, only the key is deleted. If \code{prefix} is provided, all keys that are found by the given prefix are deleted. Finally, if \code{prefix} is \code{NULL}, all keys in the bucket are deleted.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param key_name S3 key name
+#' @param prefix prefix that filters keys
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of key deletion information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'delete_keys('aws-access-id', 'secret-access-key', 'bucket-name', key_name = 'key-name')
+#'delete_keys('aws-access-id', 'secret-access-key', 'bucket-name', prefix = 'prefix')
+#'delete_keys('aws-access-id', 'secret-access-key', 'bucket-name')
 #' }
-delete_key <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
+delete_keys <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
   if(!is.null(key_name)) {
     if(key_name == '') stop('key_name: expected one argument')
   }
 
-  path <- system.file('python', 'delete_key.py', package = 'rs3helper')
+  path <- system.file('python', 'delete_keys.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
   if(!is.null(key_name)) command <- paste(command, '--key_name', key_name)
   if(!is.null(prefix)) command <- paste(command, '--prefix', prefix)
@@ -389,31 +462,49 @@ delete_key <- function(access_key_id, secret_access_key, bucket_name, key_name =
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Download file
+#' Download S3 contents
 #'
-#' \code{download_file}
+#' \code{download_file} download one or more S3 contents.
 #'
-#' @param param param
-#' @return
+#'
+#' If \code{key_name} is provided, only the key is downloaded. If \code{prefix} is provided, all keys that are found by the given prefix are downloaded.
+#' If \code{pattern} is provided, only the keys that match the pattern are downloaded. Finally, if only \code{bucket_name} is provided, all keys in the bucket are downloaded.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param key_name S3 key name
+#' @param file_path download file path
+#' @param pattern key search pattern
+#' @param prefix prefix that filters keys
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a data frame of content download information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'download_file('aws-access-key', 'secret-access-key', bucket_name = 'bucket-name', key_name = 'key-name', file_path = set_file_path(getwd()))
+#'download_file('aws-access-key', 'secret-access-key', bucket_name = 'bucket-name', prfix = 'prefix', file_path = set_file_path(getwd()))
+#'download_file('aws-access-key', 'secret-access-key', bucket_name = 'bucket-name', prfix = 'prefix', pattern = 'pattern', file_path = set_file_path(getwd()))
+#'download_file('aws-access-key', 'secret-access-key', bucket_name = 'bucket-name', file_path = set_file_path(getwd()))
 #' }
-download_file <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, file_path = NULL, pattern = NULL, prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
+download_files <- function(access_key_id, secret_access_key, bucket_name, key_name = NULL, file_path = NULL, pattern = NULL, prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
   if(!is.null(key_name)) {
     if(key_name == '') stop('key_name: expected one argument')
   }
 
-  path <- system.file('python', 'download_file.py', package = 'rs3helper')
+  path <- system.file('python', 'download_files.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
   if(!is.null(key_name)) command <- paste(command, '--key_name', key_name)
   if(!is.null(file_path)) command <- paste(command, '--file_path', file_path)
@@ -424,29 +515,41 @@ download_file <- function(access_key_id, secret_access_key, bucket_name, key_nam
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
 
-#' Upload file
+#' Upload file to S3
 #'
-#' \code{upload_file}
+#' \code{upload_file} uploads a file
 #'
-#' @param param param
-#' @return
+#'
+#' If \code{prefix} is \code{NULL}, the content is uploaded to the root of the bucket. \code{prefix} should be provided to upload to a necessary location.
+#' For example, if a file should be uploaded to a subfolder, \code{prefix} should be the name of the subfolder.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param file_path folder path
+#' @param file_name file name
+#' @param prefix prefix that filters keys
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of content upload information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'upload_file('aws-access-key', 'secret-access-key', 'bucket-name', file_path = set_file_path(), file_name = 'file-name')
+#'upload_file('aws-access-key', 'secret-access-key', 'bucket-name', file_path = set_file_path(), file_name = 'file-name', prefix = 'subfolder')
 #' }
 upload_file <- function(access_key_id, secret_access_key, bucket_name, file_path, file_name, prefix = NULL, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
-  if(!is.null(key_name)) {
-    if(key_name == '') stop('key_name: expected one argument')
-  }
 
   path <- system.file('python', 'upload_file.py', package = 'rs3helper')
   command <- paste('python', path, '--access_key_id', access_key_id, '--secret_access_key', secret_access_key, '--bucket_name', bucket_name)
@@ -457,7 +560,7 @@ upload_file <- function(access_key_id, secret_access_key, bucket_name, file_path
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
@@ -466,14 +569,28 @@ upload_file <- function(access_key_id, secret_access_key, bucket_name, file_path
 
 #' Copy file
 #'
-#' \code{copy_file}
+#' \code{copy_file} copies a file within S3.
 #'
-#' @param param param
-#' @return
+#'
+#' The source and destination bucket can be the same. A file can be copied into a subfolder of the destination bucket by adjusting \code{dst_key_name}. eg) \code{dst_key_name = 'subfolder/dst_key_name'}.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param src_bucket_name Source S3 bucket name
+#' @param src_key_name Source S3 key name
+#' @param dst_bucket_name Destination S3 bucket name
+#' @param dst_key_name Destination S3 key name
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of content copy information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'copy_file('access-key-id', 'secret-access-key', 'src-bucket-name', 'src-key-name', 'dst-bucket-name', 'dst-key-name')
+#'copy_file('access-key-id', 'secret-access-key', 'same-bucket-name', 'src-key-name', 'same-bucket-name', 'subfolder/src-key-name')
 #' }
 copy_file <- function(access_key_id, secret_access_key, src_bucket_name, src_key_name, dst_bucket_name, dst_key_name, is_ordinary_calling_format = FALSE, region = NULL) {
   names <- c(src_bucket_name, src_key_name, dst_bucket_name, dst_key_name)
@@ -489,7 +606,7 @@ copy_file <- function(access_key_id, secret_access_key, src_bucket_name, src_key
 
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
@@ -498,14 +615,22 @@ copy_file <- function(access_key_id, secret_access_key, src_bucket_name, src_key
 
 #' Generate URL
 #'
-#' \code{generate_url}
+#' \code{generate_url} generates a URL for a S3 object given amount of time in second.
 #'
-#' @param param param
-#' @return
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param bucket_name S3 bucket name
+#' @param key_name S3 key name
+#' @param seconds Time in seconds
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a list of content upload information
 #' @export
 #' @examples
 #' \dontrun{
 #'
+#'generate_url('aws-access-key', 'secret-access-key', 'bucket-name', 'key-name', 30)
 #' }
 generate_url <- function(access_key_id, secret_access_key, bucket_name, key_name, seconds, is_ordinary_calling_format = FALSE, region = NULL) {
   if(bucket_name == '') stop('bucket_name: expected one argument')
@@ -518,12 +643,44 @@ generate_url <- function(access_key_id, secret_access_key, bucket_name, key_name
   if(is_ordinary_calling_format) command <- paste(command, '--is_ordinary_calling_format', convert_bool(is_ordinary_calling_format))
   if(!is.null(region)) command <- paste(command, '--region', region)
 
+  print(command)
   response <- system(command, intern = TRUE)
   tryCatch({
-    fromJSON(response)
+    jsonlite::fromJSON(response)
   }, error = function(err) {
     warning('fails to parse JSON response')
     response
   })
 }
+
+#' Wrapper of other functions
+#'
+#' \code{rs3wrapper} returns a functional with connection related arguments pre-filled.
+#'
+#'
+#' The following 4 connection related variables are repeated in almost all functions and their values can be applied at once using this functions.
+#' A partially applied functional is returned where the 4 values are pre-filled by executing \code{rs3wrapper}. Then a function and its argument can be entered in each of the two braces.
+#'
+#' For \code{is_ordinary_calling_format} and \code{region}, see \link{connect_test}.
+#'
+#' @param access_key_id AWS access key id
+#' @param secret_access_key AWS secret access key
+#' @param is_ordinary_calling_format Connection calling format
+#' @param region Connection region
+#' @return a wrapper functional of other functions
+#' @export
+#' @examples
+#' \dontrun{
+#'
+#'wrapper <- rs3wrapper('access-key-id', 'secret-access-key')
+#'wrapper(get_all_buckets)()
+#'wrapper(lookup_bucket)(bucket_name = 'bucket-name')
+#' }
+rs3wrapper <- function(access_key_id, secret_access_key, is_ordinary_calling_format = FALSE, region = NULL) {
+  function(f) {
+    pryr::partial(f, access_key_id = access_key_id, secret_access_key = secret_access_key, is_ordinary_calling_format = is_ordinary_calling_format, region = region)
+  }
+}
+
+
 

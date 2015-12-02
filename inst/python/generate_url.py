@@ -8,7 +8,7 @@ parser.add_argument('--access_key_id', required=True, type=str, help='AWS access
 parser.add_argument('--secret_access_key', required=True, type=str, help='AWS secret access key')
 parser.add_argument('--bucket_name', required=True, type=str, help='S3 bucket name')
 parser.add_argument('--key_name', required=True, type=str, help='S3 key name')
-parser.add_argument('--seconds', required=True, type=str, help='Seconds to keep a url')
+parser.add_argument('--seconds', required=True, type=int, help='Seconds to keep a url')
 parser.add_argument('--is_ordinary_calling_format', required=False, type=bool, help='Connected in ordinary calling format?')
 parser.add_argument('--region', required=False, type=str, help='Region info')
 
