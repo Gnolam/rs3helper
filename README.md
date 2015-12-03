@@ -24,7 +24,7 @@ devtools::install_github("jaehyeon-kim/rs3helper")
 library(rs3helper)
 ```
 
-Note, if you see the following error, install the **jsonlite** package again and run the above snippet again - this package is used to parse responses of the Python scripts.
+Note, if you see the following error, install the **jsonlite** package again and run the above snippet - this package is used to parse responses of the Python scripts.
 
 ```r
 Error in (function (dep_name, dep_ver = NA, dep_compare = NA)  : 
