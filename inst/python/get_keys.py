@@ -18,4 +18,4 @@ bucket_res = get_bucket_response(conn_res, args.bucket_name)
 bucket_list_res = get_bucket_list_response(bucket_res, args.prefix)
 response = get_keys(bucket_list_res)
 
-print(json.dumps(response))
+print(json.dumps(response, sort_keys=True, indent=4, separators=(',', ': ')))

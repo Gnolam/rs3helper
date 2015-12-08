@@ -18,4 +18,4 @@ conn_res = get_connection_response(args.access_key_id, args.secret_access_key, a
 bucket_res = get_bucket_response(conn_res, args.bucket_name)
 response = generate_url(bucket_res, args.key_name, args.seconds)
 
-print(json.dumps(response))
+print(json.dumps(response, sort_keys=True, indent=4, separators=(',', ': ')))
