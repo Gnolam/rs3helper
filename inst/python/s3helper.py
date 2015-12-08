@@ -293,14 +293,27 @@ def download_files(conn_res, bucket_name, file_path = None, key_name = None, pat
         cnt = count_bucket_list((bucket_list, res))
         if cnt > 0:
             pattern = pattern if pattern is not None else '.+'
+            flag = 1
             for key in bucket_list:
-                key_str = str(key.key)
-                if re.search(pattern, key_str) is not None:
-                    response.append(download_file((key, key_str), key_str, file_path))
+                if flag > 0:
+                    key_str = str(key.key)
+                    try:
+                        re.search(pattern, key_str)
+                    except re.error as e:
+                        flag = 0
+                        res = 'invalid pattern: {0}'.format(str(e))
+                        break
+            if flag > 0:
+                for key in bucket_list:
+                    key_str = str(key.key)
+                    if re.search(pattern, key_str) is not None:
+                        response.append(download_file((key, key_str), key_str, file_path))
+            else:
+                response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': res})
             if len(response) == 0:
-                response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'key that matches the pattern is not found'})
+                response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'key is not found'})
         elif cnt == 0:
-            response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'key is not found in the bucket'})
+            response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': 'there is no key in the bucket'})
         else:
             response.append({'key_name': None, 'is_downloaded': False, 'file_path': None, 'file_name': None, 'message': res})
     return response
